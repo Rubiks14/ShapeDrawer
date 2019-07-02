@@ -1,0 +1,32 @@
+body {
+    display: flex;
+    flex-direction: row;
+}
+
+canvas {
+    /* width: 80%;
+    height: 95%; */
+    border: thin solid black;
+    order: 1;
+}
+
+div#panel {
+    background-color: rgba(100, 100, 100, 0.5);
+    width: 20%;
+    height: auto;
+    order: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.tool {
+    flex-basis: content;
+    width: 100px;
+    margin-top: 10px;
+}
+
+.selected {
+    background-color: rgba(50, 50, 50, 0.5);
+}
