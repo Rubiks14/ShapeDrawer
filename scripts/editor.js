@@ -1,5 +1,7 @@
+/*jshint esversion: 6 */
+
 (function() {
-'use strict'
+"use strict"
 
 const MODES = Object.freeze({
     DRAW_MODE: 0,
@@ -25,7 +27,7 @@ const TOOLS = Object.freeze({
 
 window.onload = function() {
     const editor = new Editor(TOOLS.CANVAS);
-    editor.canvas.addEventListener("click", editor.processMouseClick);
+    editor.canvas.onclick = editor.processMouseClick;
     editor.resize();
 
     window.onresize = editor.resize;
@@ -37,11 +39,11 @@ window.onload = function() {
     const deleteButton = document.getElementById(TOOLS.DELETE_BUTTON);
     const clearButton = document.getElementById(TOOLS.CLEAR_BUTTON);
 
-    squareButton.onclick = editor.setNewShape;
-    circleButton.onclick = editor.setNewShape;
-    triangleButton.onclick = editor.setNewShape;
-    selectButton.onclick = editor.toggleSelect;
-    deleteButton.onclick = editor.toggleDelete;
+    squareButton.onclick = editor.setNewShape(SHAPES.RECTANGLE);
+    circleButton.onclick = editor.setNewShape(SHAPES.CIRCLE);
+    triangleButton.onclick = editor.setNewShape(SHAPES.TRIANGLE);
+    selectButton.onclick = editor.toggleMode(MODES.SELECT_MODE);
+    deleteButton.onclick = editor.toggleDelete(MODES.DELETE_MODE);
     clearButton.onclick = editor.clearCanvas;
 };
 
@@ -115,16 +117,19 @@ class Editor {
             // (TODO) Edit this to set to the body width/height instead of the
             // window width/height. This may resolve the stretching issue when the
             // window height is reduced.
-            const PageWidthEighty = window.innerWidth * .8;
-            const PageHeightNinetyFive = window.innerHeight * .95;
+            const PageWidthEighty = window.innerWidth * 0.8;
+            const PageHeightNinetyFive = window.innerHeight * 0.95;
             //this.ctx.save();
             this.canvas.width = PageWidthEighty;
             this.canvas.height = PageHeightNinetyFive;
             //this.ctx.restore();
             this.draw();
         };
-        this.setNewShape = (eventObject) => {
-            this.newShapeType = eventObject.target.id;
+        this.setNewShape = (shapeId) => {
+            const editor = this;
+            return function() {
+              editor.newShapeType = shapeId;
+            };
         };
         this.processMouseClick = (eventObject) => {
             const canvasMousePosition = offsetMouseToCanvas(this.canvas, eventObject);
@@ -166,23 +171,18 @@ class Editor {
             const shape = new Shape(this.newShapeType, color, position.x, position.y, width, height);
             this.shapes.push(shape);
             this.selectedShape = null;
-            console.log(this.shapes);
         };
-        this.toggleSelect = () => {
-            if (this.mode !== MODES.SELECT_MODE) {
-                this.mode = MODES.SELECT_MODE;
+        this.toggleMode = (mode) => {
+            const editor = this;
+          return function() {
+            const defaultMode = MODES.DRAW_MODE;
+            console.log(mode);
+            if (editor.mode !== mode) {
+                editor.mode = mode;
+            } else {
+                editor.mode = defaultMode;
             }
-            else {
-                this.mode = MODES.DRAW_MODE;
-            }
-        };
-        this.toggleDelete = () => {
-            if (this.mode !== MODES.DELETE_MODE) {
-                this.mode = MODES.DELETE_MODE;
-            }
-            else {
-                this.mode = MODES.DRAW_MODE;
-            }
+          };
         };
         this.deleteShape = () => {
             if (this.selectedShape !== null) {
@@ -217,6 +217,6 @@ function offsetMouseToCanvas(canvas, event){
     return {
         x: event.pageX - canvasX,
         y: event.pageY - canvasY,
-    }
+    };
 }
 })();
