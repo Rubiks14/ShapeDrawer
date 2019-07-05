@@ -14,6 +14,7 @@ const SHAPES = Object.freeze({
 });
 
 const TOOLS = Object.freeze({
+    CANVAS: "shapePlacer",
     COLOR_PICKER: "colorPicker",
     WIDTH: "width",
     HEIGHT: "height",
@@ -23,7 +24,7 @@ const TOOLS = Object.freeze({
 });
 
 window.onload = function() {
-    const editor = new Editor("shapePlacer");
+    const editor = new Editor(TOOLS.CANVAS);
     editor.canvas.addEventListener("click", editor.processMouseClick);
     editor.resize();
 
@@ -75,7 +76,7 @@ class Shape {
             }
             const shape = new Path2D();
             const HalfWidth = this.width / 2;
-            const HalfHeight = this.width / 2;
+            const HalfHeight = this.height / 2;
         
             if (this.type === SHAPES.RECTANGLE) {
                 shape.rect(this.x - HalfWidth, this.y - HalfHeight, this.width, this.height);
