@@ -110,10 +110,11 @@ class Editor {
         this.selectedShape = null;
         this.mode = MODES.DRAW_MODE;
         this.resize = () => {
-            // These numbers are used for sizing the canvas to a width that fits
-            // well in the page and allows for the sidebar on the right
-            // (TODO) Edit this to set to the body width instead of the window width
-            // This may resolve the stretching issue when the window height is reduced
+            // These numbers are used for sizing the canvas to a width and height
+            // that fits well in the page and allows for the sidebar on the right
+            // (TODO) Edit this to set to the body width/height instead of the
+            // window width/height. This may resolve the stretching issue when the
+            // window height is reduced.
             const PageWidthEighty = window.innerWidth * .8;
             const PageHeightNinetyFive = window.innerHeight * .95;
             //this.ctx.save();
