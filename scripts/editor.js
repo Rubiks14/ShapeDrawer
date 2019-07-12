@@ -1,117 +1,118 @@
 /*jshint esversion: 6 */
 
 (function() {
-"use strict"
-
-const MODES = Object.freeze({
-    DRAW_MODE: 0,
-    SELECT_MODE: 1,
-    DELETE_MODE: 2,
-});
-
-const SHAPES = Object.freeze({
-    RECTANGLE: "rectangle",
-    CIRCLE: "circle",
-    TRIANGLE: "triangle",
-});
-
-const TOOLS = Object.freeze({
-    CANVAS: "shapePlacer",
-    COLOR_PICKER: "colorPicker",
-    WIDTH: "width",
-    HEIGHT: "height",
-    SELECT_BUTTON: "select",
-    DELETE_BUTTON: "delete",
-    CLEAR_BUTTON: "clear",
-});
-
-window.onload = function() {
-    const editor = new Editor(TOOLS.CANVAS);
-    editor.canvas.onclick = editor.processMouseClick;
-    editor.resize();
-
-    window.onresize = editor.resize;
-        
-    const squareButton = document.getElementById(SHAPES.RECTANGLE);
-    const circleButton = document.getElementById(SHAPES.CIRCLE);
-    const triangleButton = document.getElementById(SHAPES.TRIANGLE);
-    const selectButton = document.getElementById(TOOLS.SELECT_BUTTON);
-    const deleteButton = document.getElementById(TOOLS.DELETE_BUTTON);
-    const clearButton = document.getElementById(TOOLS.CLEAR_BUTTON);
-
-    squareButton.onclick = editor.setNewShape(SHAPES.RECTANGLE);
-    circleButton.onclick = editor.setNewShape(SHAPES.CIRCLE);
-    triangleButton.onclick = editor.setNewShape(SHAPES.TRIANGLE);
-    selectButton.onclick = editor.toggleMode(MODES.SELECT_MODE);
-    deleteButton.onclick = editor.toggleDelete(MODES.DELETE_MODE);
-    clearButton.onclick = editor.clearCanvas;
-};
-
-
-class Shape {
-    constructor(type, color = "#000", x = 0, y = 0, width = 100, height = null) {
-        if (type === null) {
-            console.error("You must pass a type of shape into the function (e.g. Square, Triangle, Circle)");
-            return null;
-        }
-        if (height === null) {
-            height = width;
-        }
-        this.type = type;
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.color = color;
-        this.shapePath = null;
-        this.setLocation = (x, y) => {
+    "use strict"
+    
+    const MODES = Object.freeze({
+        DRAW_MODE: 0,
+        SELECT_MODE: 1,
+        DELETE_MODE: 2,
+    });
+    
+    const SHAPES = Object.freeze({
+        RECTANGLE: "rectangle",
+        CIRCLE: "circle",
+        TRIANGLE: "triangle",
+    });
+    
+    const TOOLS = Object.freeze({
+        CANVAS: "shapePlacer",
+        COLOR_PICKER: "colorPicker",
+        WIDTH: "width",
+        HEIGHT: "height",
+        SELECT_BUTTON: "select",
+        DELETE_BUTTON: "delete",
+        CLEAR_BUTTON: "clear",
+    });
+    
+    window.onload = function() {
+        const editor = new Editor(TOOLS.CANVAS);
+        editor.canvas.onclick = editor.processMouseClick;
+        editor.resize();
+    
+        window.onresize = editor.resize;
+            
+        const squareButton = document.getElementById(SHAPES.RECTANGLE);
+        const circleButton = document.getElementById(SHAPES.CIRCLE);
+        const triangleButton = document.getElementById(SHAPES.TRIANGLE);
+        const selectButton = document.getElementById(TOOLS.SELECT_BUTTON);
+        const deleteButton = document.getElementById(TOOLS.DELETE_BUTTON);
+        const clearButton = document.getElementById(TOOLS.CLEAR_BUTTON);
+    
+        squareButton.onclick = editor.setNewShape(SHAPES.RECTANGLE);
+        circleButton.onclick = editor.setNewShape(SHAPES.CIRCLE);
+        triangleButton.onclick = editor.setNewShape(SHAPES.TRIANGLE);
+        selectButton.onclick =  editor.toggleMode(MODES.SELECT_MODE);
+        deleteButton.onclick = editor.toggleMode(MODES.DELETE_MODE);
+        clearButton.onclick = editor.clearCanvas;
+    };
+    
+    
+    class Shape {
+        constructor(type, color = "#000", x = 0, y = 0, width = 100, height = null) {
+            if (type === null) {
+                console.error("You must pass a type of shape into the function (e.g. Square, Triangle, Circle)");
+                return null;
+            }
+            if (height === null) {
+                height = width;
+            }
+            this.type = type;
             this.x = x;
             this.y = y;
-        };
-        this.setColor = (color) => {
+            this.width = width;
+            this.height = height;
             this.color = color;
-        };
+            this.shapePath = null;
+        }
+        //(TODO) hook this up to the editor for modifying the currently selected shape
+        // setLocation = (x, y) => {
+        //     this.x = x;
+        //     this.y = y;
+        // };
+        // setColor = (color) => {
+        //     this.color = color;
+        // };
 
-        this.createShapePath = () => {
+        createShapePath = () => {
             if (this.type === "") {
                 return null;
             }
             const shape = new Path2D();
-            const HalfWidth = this.width / 2;
-            const HalfHeight = this.height / 2;
+            const halfWidth = this.width / 2;
+            const halfHeight = this.height / 2;
         
             if (this.type === SHAPES.RECTANGLE) {
-                shape.rect(this.x - HalfWidth, this.y - HalfHeight, this.width, this.height);
+                shape.rect(this.x - halfWidth, this.y - halfHeight, this.width, this.height);
             } else if (this.type === SHAPES.CIRCLE) {
-                shape.arc(this.x , this.y, HalfWidth, 0, Math.PI * 2);
+                shape.arc(this.x , this.y, halfWidth, 0, Math.PI * 2);
             } else if (this.type === SHAPES.TRIANGLE) {
-                shape.moveTo(this.x, this.y - HalfHeight);
-                shape.lineTo(this.x - HalfWidth, this.y + HalfHeight);
-                shape.lineTo(this.x + HalfWidth , this.y + HalfHeight);
+                shape.moveTo(this.x, this.y - halfHeight);
+                shape.lineTo(this.x - halfWidth, this.y + halfHeight);
+                shape.lineTo(this.x + halfWidth , this.y + halfHeight);
             }
             this.shapePath = shape;
         };
-        this.createShapePath();
     }
-}
-
-class Editor {
-    constructor(elementName) {
-        this.canvas = document.getElementById(elementName);
-        if (!this.canvas.getContext) {
-            console.error("Canvas is not supported or no canvas object found");
-            return null;
+    
+    class Editor {
+        constructor(elementName) {
+            this.canvas = document.getElementById(elementName);
+            if (!this.canvas.getContext) {
+                console.error("Canvas is not supported or no canvas object found");
+                return null;
+            }
+            // (TODO) Set up the tools so that they can be used on the selected shape
+            this.colorPicker = document.getElementById(TOOLS.COLOR_PICKER);
+            this.widthAdjuster = document.getElementById(TOOLS.WIDTH);
+            this.heightAdjuster = document.getElementById(TOOLS.HEIGHT);
+            this.ctx = this.canvas.getContext("2d");
+            this.shapes = [];
+            this.newShapeType = "";
+            this.selectedShape = null;
+            this.mode = MODES.DRAW_MODE;
         }
-        // (TODO) Set up the tools so that they can be used on the selected shape
-        this.colorPicker = document.getElementById(TOOLS.COLOR_PICKER);
-        this.widthAdjuster = document.getElementById(TOOLS.WIDTH);
-        this.heightAdjuster = document.getElementById(TOOLS.HEIGHT);
-        this.ctx = this.canvas.getContext("2d");
-        this.shapes = [];
-        this.newShapeType = "";
-        this.selectedShape = null;
-        this.mode = MODES.DRAW_MODE;
-        this.resize = () => {
+        resize = () => {
             // These numbers are used for sizing the canvas to a width and height
             // that fits well in the page and allows for the sidebar on the right
             // (TODO) Edit this to set to the body width/height instead of the
@@ -125,14 +126,17 @@ class Editor {
             //this.ctx.restore();
             this.draw();
         };
-        this.setNewShape = (shapeId) => {
-            const editor = this;
+        /**
+         * @param {string} shapeId
+         */
+        setNewShape(shapeId) {
+            let editor = this;
             return function() {
-              editor.newShapeType = shapeId;
+                editor.newShapeType = shapeId;
             };
         };
-        this.processMouseClick = (eventObject) => {
-            const canvasMousePosition = offsetMouseToCanvas(this.canvas, eventObject);
+        processMouseClick = (eventObject) => {
+            const canvasMousePosition = offsetMouseToCanvas(this.canvas, eventObject.pageX, eventObject.pageY);
             if (this.mode === MODES.SELECT_MODE) {
                 this.selectShape(canvasMousePosition);
             }
@@ -145,10 +149,12 @@ class Editor {
             }
             this.draw();
         };
-        this.selectShape = (mousePosition) => {
+        selectShape = (mousePosition) => {
             if (this.shapes.length < 1) {
                 return;
             }
+            // clear the selected shape if there is one.
+            this.selectedShape = null;
             // Loop through the array backwards to select the items on top
             // if an item is selected move it to the top of the canvas and move
             // its data to the back of the array. This allows the canvas order
@@ -164,38 +170,36 @@ class Editor {
                 }
             }
         };
-        this.createShape = (position, color, width, height) => {
+        createShape = (position, color, width, height) => {
             if (this.newShapeType === "") {
                 return;
             }
             const shape = new Shape(this.newShapeType, color, position.x, position.y, width, height);
+            shape.createShapePath();
             this.shapes.push(shape);
             this.selectedShape = null;
         };
-        this.toggleMode = (mode) => {
-            const editor = this;
-          return function() {
+        toggleMode = (mode) => {
+        const editor = this;
+        return function() {
             const defaultMode = MODES.DRAW_MODE;
-            console.log(mode);
-            if (editor.mode !== mode) {
-                editor.mode = mode;
-            } else {
-                editor.mode = defaultMode;
-            }
-          };
+            editor.mode = (editor.mode !== mode) ? mode : defaultMode;
         };
-        this.deleteShape = () => {
+        };
+        deleteShape = () => {
             if (this.selectedShape !== null) {
                 this.shapes.pop();
                 this.selectedShape = null;
             }
             this.draw();
         };
-        this.clearCanvas = () => {
-            this.shapes.splice(0, this.shapes.length);
-            this.draw();
+        clearCanvas = () => {
+            if ( confirm("Are you sure you want to clear the canvas?") ) {
+                this.shapes.splice(0, this.shapes.length);
+                this.draw();
+            }
         };
-        this.draw = () => {
+        draw = () => {
             this.ctx.fillStyle = "#fff";
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             if (this.shapes.length < 1) {
@@ -209,14 +213,13 @@ class Editor {
             });
         };
     }
-}
-
-function offsetMouseToCanvas(canvas, event){
-    const canvasX = canvas.offsetLeft;
-    const canvasY = canvas.offsetTop;
-    return {
-        x: event.pageX - canvasX,
-        y: event.pageY - canvasY,
-    };
-}
+    
+    function offsetMouseToCanvas(canvas, mouseX, mouseY){
+        const canvasX = canvas.offsetLeft;
+        const canvasY = canvas.offsetTop;
+        return {
+            x: mouseX - canvasX,
+            y: mouseY - canvasY,
+        };
+    }
 })();
